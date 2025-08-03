@@ -1,61 +1,28 @@
-/* Reset and base */
+/* Reset */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* Body with dark calm background and centered canvas */
 body {
-  background: linear-gradient(to bottom, #0b1a33, #220022);
-  color: #eee;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  text-align: center;
-  height: 100vh;
+  background: #0b1a33;
   display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
+  height: 100vh;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   user-select: none;
 }
 
-header {
-  margin: 1rem;
-}
-
-h1 {
-  font-size: 2rem;
-  color: #aabbff;
-  text-shadow: 0 0 8px #aabbff;
-  margin-bottom: 0.5rem;
-}
-
-p {
-  font-size: 1rem;
-  color: #ccc;
-  margin-bottom: 0.3rem;
-}
-
+/* Canvas border and smooth edges */
 canvas#game {
-  border: 3px solid #77aaff;
-  border-radius: 8px;
-  background-color: #0b1a33;
-  margin: 1rem auto;
+  border: 2px solid #7ec8e3;
+  border-radius: 12px;
+  background: #0b1a33;
+  image-rendering: pixelated; /* crisp pixel art */
   display: block;
-  image-rendering: pixelated;
-}
-
-/* Footer style */
-footer {
-  margin-top: auto;
-  margin-bottom: 1rem;
-  color: #9999bb;
-  font-style: italic;
-}
-
-/* Responsive */
-@media (max-width: 500px) {
-  canvas#game {
-    width: 90vw;
-    height: auto;
-  }
+  max-width: 90vw;
+  max-height: 90vh;
 }

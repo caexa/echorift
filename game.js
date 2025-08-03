@@ -1,5 +1,3 @@
-// EchoRift: Elae’s Journey - Full Enhanced Gameplay Script
-
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
@@ -9,7 +7,6 @@ const groundY = HEIGHT - 60;
 
 const gravity = 0.8;
 
-// Elae - pixel cat with smooth animation state
 const elae = {
   x: 60,
   y: groundY,
@@ -17,10 +14,9 @@ const elae = {
   height: 32,
   vy: 0,
   jumping: false,
-  dashing: false,
   dashCooldown: 0,
+  dashing: false,
   dashTimeLeft: 0,
-  speedX: 0,
   blinkTimer: 0,
   spriteFrame: 0,
   tailWag: 0,
@@ -36,31 +32,31 @@ let crystals = [];
 let shardsCollected = 0;
 let score = 0;
 let powerUp = "None";
-let gameSpeed = 5;
+let baseSpeed = 4;      // Base game speed
+let gameSpeed = baseSpeed;
+const maxSpeed = 10;    // Cap max speed here
 
 let frameCount = 0;
 let gameRunning = false;
 
 const keys = {};
 
-// Rift states affect difficulty and mood
 const riftStates = [
   { name: "Stable", speedMult: 1, bgColor: "#0b1a33" },
-  { name: "Shifting", speedMult: 1.25, bgColor: "#2b1a3d" },
-  { name: "Unraveling", speedMult: 1.6, bgColor: "#4b134d" },
-  { name: "Fractured", speedMult: 2, bgColor: "#6b0f5a" },
+  { name: "Shifting", speedMult: 1.1, bgColor: "#2b1a3d" },
+  { name: "Unraveling", speedMult: 1.3, bgColor: "#4b134d" },
+  { name: "Fractured", speedMult: 1.5, bgColor: "#6b0f5a" },
 ];
 let currentRiftIndex = 0;
 
 const maxFocusDuration = 180;
 
-// Story pieces appear as smooth narration overlays
 const storyPieces = [
-  "You are Elae, the last guardian of the Echo Rift.",
-  "This realm weaves fading memories into reality.",
-  "Collect shards to restore forgotten echoes...",
-  "Avoid shadow echoes that seek to consume the light.",
-  "Your journey will decide the fate of forgotten souls.",
+  "You are Elae, guardian of the Echo Rift.",
+  "Collect memory shards to mend fading echoes.",
+  "Avoid shadow echoes that lurk in the Rift.",
+  "Master your focus and dash to survive.",
+  "Your journey shapes the fate of forgotten souls.",
 ];
 
 const storyFragments = [
@@ -72,14 +68,12 @@ const storyFragments = [
   "Run faster, Elae. Freedom beckons.",
 ];
 
-// Narration system state
 let narrationQueue = [];
 let narrationVisible = false;
 let narrationAlpha = 0;
 let narrationTimer = 0;
-const narrationFadeSpeed = 0.02; // fade speed
+const narrationFadeSpeed = 0.02;
 
-// Show narration text in overlay with fade in/out
 function showNarration(text) {
   narrationQueue.push(text);
   if (!narrationVisible) {
@@ -89,7 +83,6 @@ function showNarration(text) {
   }
 }
 
-// Handle narration display and fading
 function updateNarration() {
   if (!narrationVisible) return;
 
@@ -108,7 +101,6 @@ function updateNarration() {
   narrationTimer++;
 }
 
-// Draw narration overlay box and text
 function drawNarration() {
   if (!narrationVisible || narrationQueue.length === 0) return;
 
@@ -120,11 +112,9 @@ function drawNarration() {
   const x = 30;
   const y = HEIGHT - boxHeight - 30;
 
-  // Background box
   ctx.fillStyle = "rgba(30, 30, 60, 0.85)";
   roundRect(ctx, x, y, boxWidth, boxHeight, 12, true);
 
-  // Text
   ctx.fillStyle = "#d0d9ff";
   ctx.font = "18px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
   ctx.textAlign = "center";
@@ -133,7 +123,6 @@ function drawNarration() {
   ctx.restore();
 }
 
-// Utility to draw rounded rectangles
 function roundRect(ctx, x, y, w, h, r, fill) {
   if (w < 2 * r) r = w / 2;
   if (h < 2 * r) r = h / 2;
@@ -147,7 +136,6 @@ function roundRect(ctx, x, y, w, h, r, fill) {
   if (fill) ctx.fill();
 }
 
-// --- Controls ---
 document.addEventListener("keydown", (e) => {
   keys[e.key.toLowerCase()] = true;
 
@@ -157,13 +145,16 @@ document.addEventListener("keydown", (e) => {
     powerUp = "Focus — slowing Rift & shadows";
     showNarration("Elae’s focus slows the Rift's pace...");
   }
+
+  if (e.key === "Enter" && !gameRunning) {
+    startGame();
+  }
 });
 
 document.addEventListener("keyup", (e) => {
   keys[e.key.toLowerCase()] = false;
 });
 
-// --- Reset game ---
 function resetGame() {
   score = 0;
   shardsCollected = 0;
@@ -175,34 +166,32 @@ function resetGame() {
   elae.dashing = false;
   elae.dashCooldown = 0;
   elae.dashTimeLeft = 0;
-  elae.speedX = 0;
+  elae.blinkTimer = 0;
+  elae.spriteFrame = 0;
+  elae.tailWag = 0;
   elae.shield = false;
   elae.shieldTimer = 0;
   elae.focusActive = false;
   elae.focusTimer = 0;
-  elae.blinkTimer = 0;
-  elae.spriteFrame = 0;
-  elae.tailWag = 0;
 
   obstacles = [];
   crystals = [];
   frameCount = 0;
-  gameSpeed = 5;
+  gameSpeed = baseSpeed;
   currentRiftIndex = 0;
+
   narrationQueue = [...storyPieces];
   narrationVisible = true;
   narrationAlpha = 0;
   narrationTimer = 0;
 }
 
-// --- Start ---
 function startGame() {
   gameRunning = true;
   resetGame();
   update();
 }
 
-// --- Rift state advancement ---
 function nextRiftState() {
   if (currentRiftIndex < riftStates.length - 1) {
     currentRiftIndex++;
@@ -210,11 +199,10 @@ function nextRiftState() {
   }
 }
 
-// --- Draw Elae ---
 function drawElae() {
   elae.blinkTimer++;
   if (elae.blinkTimer > 200) {
-    elae.spriteFrame = 1; // closed eyes
+    elae.spriteFrame = 1;
     if (elae.blinkTimer > 215) {
       elae.spriteFrame = 0;
       elae.blinkTimer = 0;
@@ -228,18 +216,15 @@ function drawElae() {
   ctx.save();
   ctx.translate(elae.x, elae.y + elae.tailWag);
 
-  // Body
-  ctx.fillStyle = "#888888";
+  ctx.fillStyle = "#888";
   ctx.fillRect(0, 10, elae.width, 14);
 
-  // Head
-  ctx.fillStyle = "#bbbbbb";
+  ctx.fillStyle = "#bbb";
   ctx.beginPath();
   ctx.ellipse(elae.width / 2, 10, 14, 14, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Eyes
-  ctx.fillStyle = "#000000";
+  ctx.fillStyle = "#000";
   if (elae.spriteFrame === 0) {
     ctx.fillRect(8, 5, 4, 4);
     ctx.fillRect(elae.width - 14, 5, 4, 4);
@@ -248,8 +233,7 @@ function drawElae() {
     ctx.fillRect(elae.width - 15, 7, 5, 1);
   }
 
-  // Ears
-  ctx.fillStyle = "#666666";
+  ctx.fillStyle = "#666";
   ctx.beginPath();
   ctx.moveTo(4, 0);
   ctx.lineTo(10, 0);
@@ -267,7 +251,6 @@ function drawElae() {
   ctx.restore();
 }
 
-// --- Draw obstacles ---
 function drawObstacles() {
   obstacles.forEach((obs) => {
     ctx.fillStyle = obs.color;
@@ -275,7 +258,6 @@ function drawObstacles() {
   });
 }
 
-// --- Draw crystals ---
 function drawCrystals() {
   crystals.forEach((c) => {
     ctx.fillStyle = c.color;
@@ -285,7 +267,6 @@ function drawCrystals() {
   });
 }
 
-// --- Update obstacles and crystals ---
 function updateObjects() {
   const riftSpeedMult = riftStates[currentRiftIndex].speedMult;
   const focusMult = elae.focusActive ? 0.5 : 1;
@@ -313,7 +294,10 @@ function updateObjects() {
     if (o.x + o.width < 0) {
       obstacles.splice(i, 1);
       score++;
-      if (score % 10 === 0 && currentRiftIndex < riftStates.length - 1) {
+      // Smooth speed increase capped by maxSpeed
+      gameSpeed = Math.min(baseSpeed + score * 0.05, maxSpeed);
+      // Rift state upgrade every 15 points maxed at last state
+      if (score % 15 === 0 && currentRiftIndex < riftStates.length - 1) {
         nextRiftState();
       }
     }
@@ -344,12 +328,11 @@ function updateObjects() {
   }
 }
 
-// --- Spawn obstacles and crystals ---
 function spawnObjects() {
   const riftSpeedMult = riftStates[currentRiftIndex].speedMult;
   const focusMult = elae.focusActive ? 0.5 : 1;
 
-  if (frameCount % Math.floor(80 / riftSpeedMult / focusMult) === 0) {
+  if (frameCount % Math.floor(100 / riftSpeedMult / focusMult) === 0) {
     obstacles.push({
       x: WIDTH,
       y: groundY + 5,
@@ -359,7 +342,7 @@ function spawnObjects() {
     });
   }
 
-  if (frameCount % Math.floor(140 / riftSpeedMult / focusMult) === 0) {
+  if (frameCount % Math.floor(160 / riftSpeedMult / focusMult) === 0) {
     crystals.push({
       x: WIDTH,
       y: groundY - 18,
@@ -369,9 +352,7 @@ function spawnObjects() {
   }
 }
 
-// --- Update Elae physics and movement ---
 function updateElae() {
-  // Gravity
   elae.vy += gravity;
   elae.y += elae.vy;
 
@@ -381,13 +362,11 @@ function updateElae() {
     elae.jumping = false;
   }
 
-  // Jumping
   if (keys[" "] && !elae.jumping && !elae.dashing) {
     elae.vy = -14;
     elae.jumping = true;
   }
 
-  // Dashing
   if (keys["d"] && !elae.dashing && elae.dashCooldown <= 0) {
     elae.dashing = true;
     elae.dashTimeLeft = 15;
@@ -404,7 +383,6 @@ function updateElae() {
 
   if (elae.dashCooldown > 0) elae.dashCooldown--;
 
-  // Focus timer
   if (elae.focusActive) {
     elae.focusTimer--;
     if (elae.focusTimer <= 0) {
@@ -414,12 +392,10 @@ function updateElae() {
     }
   }
 
-  // Keep Elae on screen
   if (elae.x + elae.width > WIDTH) elae.x = WIDTH - elae.width;
   if (elae.x < 0) elae.x = 0;
 }
 
-// --- Draw UI ---
 function drawUI() {
   ctx.fillStyle = "#d0d9ff";
   ctx.font = "16px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
@@ -436,17 +412,14 @@ function drawUI() {
   }
 }
 
-// --- Game over ---
 function endGame() {
   gameRunning = false;
   showNarration(`Elae’s journey ends with a score of ${score}. Press ENTER to restart.`);
 }
 
-// --- Main update loop ---
 function update() {
   frameCount++;
 
-  // Background
   ctx.fillStyle = riftStates[currentRiftIndex].bgColor;
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
@@ -466,9 +439,4 @@ function update() {
   requestAnimationFrame(update);
 }
 
-// --- Start game on ENTER ---
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && !gameRunning) {
-    startGame();
-  }
-});
+update();

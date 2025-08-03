@@ -3,28 +3,35 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Echo Rift</title>
+<title>Echo Rift - The Last Riftwalker</title>
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <h1>Echo Rift</h1>
+
   <div id="story-box">
-    <p id="intro-text">The caves are collapsing. I must run.</p>
+    <p id="intro-text">I awake within the Echo Rift — a dimension born of fractured memories.<br/>I must run, or be lost forever.</p>
     <button id="next-intro-btn">Next</button>
   </div>
-  <canvas id="game" width="600" height="300" style="display:none;"></canvas>
+
+  <canvas id="game" width="700" height="350" style="display:none;"></canvas>
+
   <div id="ui" style="display:none;">
-    <div>Score: <span id="score">0</span></div>
-    <div>Shards: <span id="shards">0</span></div>
-    <div>Power: <span id="power">None</span></div>
-    <div style="margin-top:8px;">Press SPACE to Jump, D to Dash</div>
+    <div><strong>Score:</strong> <span id="score">0</span></div>
+    <div><strong>Memory Shards:</strong> <span id="shards">0</span></div>
+    <div><strong>Power:</strong> <span id="power">None</span></div>
+    <div><strong>Rift State:</strong> <span id="rift-state">Stable</span></div>
+    <div style="margin-top:10px;">Use <kbd>SPACE</kbd> to Jump, <kbd>D</kbd> to Dash, <kbd>F</kbd> to Focus</div>
   </div>
+
   <div id="game-over" style="display:none;">
-    <h2>Game Over</h2>
+    <h2>Echo Rift Collapsed</h2>
     <p>Your Score: <span id="final-score">0</span></p>
-    <p id="reflection-text" style="margin-top:10px; font-style: italic;"></p>
-    <button id="restart-btn">Restart</button>
+    <p id="reflection-text" style="margin-top:15px; font-style: italic; max-width:400px; margin-left:auto; margin-right:auto;"></p>
+    <button id="restart-btn">Run Again</button>
   </div>
+
   <script src="game.js"></script>
 </body>
 </html>
+

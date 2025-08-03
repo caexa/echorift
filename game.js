@@ -1,3 +1,4 @@
+// DOM Elements
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
@@ -14,6 +15,7 @@ const finalScoreDisplay = document.getElementById("final-score");
 const reflectionText = document.getElementById("reflection-text");
 const restartBtn = document.getElementById("restart-btn");
 
+// Constants
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
 
@@ -50,7 +52,7 @@ let frameCount = 0;
 
 const keys = {};
 
-// Narrative and world-building elements
+// Narrative
 const introTexts = [
   "I awake within the Echo Rift — a dimension born of fractured memories.",
   "Fragments of forgotten lives whisper to me as I run.",
@@ -95,7 +97,7 @@ function nextRiftState() {
 
 const maxFocusDuration = 180; // frames (~3 seconds)
 
-// Controls
+// --- Controls ---
 document.addEventListener("keydown", (e) => {
   keys[e.key.toLowerCase()] = true;
 
@@ -104,6 +106,7 @@ document.addEventListener("keydown", (e) => {
     player.focusActive = true;
     player.focusTimer = maxFocusDuration;
     powerUp = "Focus — slowing Rift & hazards";
+    updateUI();
   }
 });
 
@@ -111,7 +114,8 @@ document.addEventListener("keyup", (e) => {
   keys[e.key.toLowerCase()] = false;
 });
 
-nextIntroBtn.onclick = () => {
+// --- Intro button ---
+nextIntroBtn.addEventListener("click", () => {
   introIndex++;
   if (introIndex < introTexts.length) {
     introTextEl.innerHTML = introTexts[introIndex].replace(/\n/g, "<br>");
@@ -121,16 +125,18 @@ nextIntroBtn.onclick = () => {
     ui.style.display = "block";
     startGame();
   }
-};
+});
 
-restartBtn.onclick = () => {
+// --- Restart button ---
+restartBtn.addEventListener("click", () => {
   gameOverScreen.style.display = "none";
   canvas.style.display = "block";
   ui.style.display = "block";
   resetGame();
   startGame();
-};
+});
 
+// --- Reset ---
 function resetGame() {
   score = 0;
   shardsCollected = 0;
@@ -153,14 +159,18 @@ function resetGame() {
   frameCount = 0;
   gameSpeed = 5;
   currentRiftStateIndex = 0;
+
+  updateUI();
 }
 
+// --- Start game ---
 function startGame() {
   gameRunning = true;
   resetGame();
   update();
 }
 
+// --- Show narrative shards ---
 function showStoryFragment() {
   if (shardsCollected > 0 && shardsCollected % 4 === 0) {
     const index = Math.floor(((shardsCollected / 4) - 1) % storyFragments.length);
@@ -168,12 +178,47 @@ function showStoryFragment() {
   }
 }
 
+// --- Game Over ---
+function gameOver() {
+  gameRunning = false;
+  canvas.style.display = "none";
+  ui.style.display = "none";
+  gameOverScreen.style.display = "block";
+
+  finalScoreDisplay.textContent = score;
+
+  const reflIndex = Math.min(Math.floor(score / 10), reflections.length - 1);
+  reflectionText.textContent = reflections[reflIndex] || "The Rift awaits your return...";
+}
+
+// --- UI Update function ---
+function updateUI() {
+  scoreDisplay.textContent = score;
+  shardsDisplay.textContent = shardsCollected;
+  powerDisplay.textContent = powerUp;
+  riftStateDisplay.textContent = riftStates[currentRiftStateIndex].name;
+
+  // Color highlight for power-ups
+  if (powerUp === "None") {
+    powerDisplay.style.color = "#ccc";
+  } else if (powerUp.includes("Focus")) {
+    powerDisplay.style.color = "#ff88ff";
+  } else if (powerUp.includes("Resolve")) {
+    powerDisplay.style.color = "#00ffff";
+  } else if (powerUp.includes("Corruption")) {
+    powerDisplay.style.color = "#ff5555";
+  } else {
+    powerDisplay.style.color = "#eee";
+  }
+}
+
+// --- Game Update Loop ---
 function update() {
   if (!gameRunning) return;
 
   frameCount++;
 
-  // Change Rift state every 30 shards collected
+  // Rift state changes every 30 shards
   if (shardsCollected > 0 && shardsCollected % 30 === 0) {
     nextRiftState();
   }
@@ -186,7 +231,7 @@ function update() {
   // Clear canvas
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
-  // Apply gravity and movement
+  // Player dash logic
   if (player.dashDuration > 0) {
     player.dashDuration--;
     player.speedX = 20;
@@ -199,13 +244,13 @@ function update() {
   player.x += player.speedX;
   player.x = Math.min(Math.max(player.x, 0), WIDTH - player.width);
 
-  // Jump
+  // Jump logic
   if (keys[" "] && !player.jumping) {
     player.vy = -14;
     player.jumping = true;
   }
 
-  // Dash
+  // Dash (D key)
   if (
     keys["d"] &&
     player.dashCooldown === 0 &&
@@ -217,16 +262,17 @@ function update() {
     player.dashCooldown = 90;
   }
 
-  // Focus power: slows time, hazards, etc
+  // Focus power (F key)
   if (player.focusActive) {
     player.focusTimer--;
     if (player.focusTimer <= 0) {
       player.focusActive = false;
       powerUp = "None";
+      updateUI();
     }
   }
 
-  // Gravity & position update
+  // Gravity & position
   player.vy += gravity;
   player.y += player.vy;
   if (player.y >= groundLevel) {
@@ -235,11 +281,10 @@ function update() {
     player.jumping = false;
   }
 
-  // Spawn obstacles faster with rift state & slow with focus
-  if (
-    frameCount % Math.floor(80 / riftState.speedMultiplier / (player.focusActive ? 0.5 : 1)) ===
-    0
-  ) {
+  // Spawn obstacles & crystals with adjusted timing based on Rift state and Focus
+  const spawnSpeedFactor = player.focusActive ? 0.5 : 1;
+
+  if (frameCount % Math.floor(80 / riftState.speedMultiplier / spawnSpeedFactor) === 0) {
     obstacles.push({
       x: WIDTH,
       y: groundLevel + 5,
@@ -250,11 +295,7 @@ function update() {
     });
   }
 
-  // Spawn crystals more often as Rift destabilizes
-  if (
-    frameCount % Math.floor(140 / riftState.speedMultiplier / (player.focusActive ? 0.5 : 1)) ===
-    0
-  ) {
+  if (frameCount % Math.floor(140 / riftState.speedMultiplier / spawnSpeedFactor) === 0) {
     crystals.push({
       x: WIDTH,
       y: groundLevel - 18,
@@ -263,10 +304,10 @@ function update() {
     });
   }
 
-  // Move obstacles & check collisions
+  // Move obstacles, collision detection
   for (let i = obstacles.length - 1; i >= 0; i--) {
     let obs = obstacles[i];
-    obs.x -= gameSpeed * (player.focusActive ? 0.5 : 1);
+    obs.x -= gameSpeed * spawnSpeedFactor;
 
     ctx.fillStyle = obs.color;
     ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
@@ -280,6 +321,8 @@ function update() {
         player.shield = false;
         player.shieldTimer = 0;
         obstacles.splice(i, 1);
+        powerUp = "None";
+        updateUI();
         continue;
       }
       gameOver();
@@ -290,15 +333,16 @@ function update() {
       if (!obs.passed) {
         score++;
         obs.passed = true;
+        updateUI();
       }
       obstacles.splice(i, 1);
     }
   }
 
-  // Move crystals & check collection
+  // Move crystals & collision
   for (let i = crystals.length - 1; i >= 0; i--) {
     let c = crystals[i];
-    c.x -= gameSpeed * (player.focusActive ? 0.5 : 1);
+    c.x -= gameSpeed * spawnSpeedFactor;
 
     // Draw glowing crystal
     const gradient = ctx.createRadialGradient(
@@ -325,22 +369,23 @@ function update() {
       shardsCollected++;
       showStoryFragment();
 
-      // 25% chance to grant or lose shield (symbolizing risk & reward)
+      // 25% chance shield toggle & score penalty to reflect risk/reward
       if (Math.random() < 0.25) {
         if (!player.shield) {
           player.shield = true;
-          player.shieldTimer = 360; // 6 seconds
+          player.shieldTimer = 360; // 6 sec
           powerUp = "Lira's Resolve — holding darkness at bay";
         } else {
-          // Lose shield & add score penalty (symbolizing Rift's corruption)
           player.shield = false;
           player.shieldTimer = 0;
           score = Math.max(score - 3, 0);
           powerUp = "Rift Corruption — shield lost";
         }
+        updateUI();
       }
 
       crystals.splice(i, 1);
+      updateUI();
       continue;
     }
 
@@ -353,10 +398,11 @@ function update() {
     if (player.shieldTimer <= 0) {
       player.shield = false;
       powerUp = "None";
+      updateUI();
     }
   }
 
-  // Draw player with glowing effect when shielded or focused
+  // Draw player with glow if shielded or focused
   ctx.fillStyle = player.color;
   if (player.shield) {
     ctx.shadowColor = "#00ffff";
@@ -370,7 +416,19 @@ function update() {
   ctx.fillRect(player.x, player.y, player.width, player.height);
   ctx.shadowBlur = 0;
 
-  // Draw ground (with subtle ripple when Rift unstable)
+  // Draw ground with subtle ripple effect on unstable Rift states
   ctx.fillStyle = riftState.name === "Stable" ? "#222244" : "#440044";
   const rippleHeight = riftState.name === "Stable" ? 0 : 2 + Math.sin(frameCount / 5) * 2;
-  ctx.fillRect
+  ctx.fillRect(0, groundLevel + rippleHeight, WIDTH, HEIGHT - groundLevel);
+
+  // Draw HUD inside canvas for visual consistency (optional)
+  // But we already have a separate UI, so we skip this to avoid clutter.
+
+  // Update UI outside canvas
+  updateUI();
+
+  requestAnimationFrame(update);
+}
+
+// Initialize UI colors and text on page load
+updateUI();

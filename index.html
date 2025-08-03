@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Echo Rift</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Echo Rift</h1>
+  <div id="story-box">
+    <p id="intro-text">The caves are collapsing. I must run.</p>
+    <button id="next-intro-btn">Next</button>
+  </div>
+  <canvas id="game" width="600" height="300" style="display:none;"></canvas>
+  <div id="ui" style="display:none;">
+    <div>Score: <span id="score">0</span></div>
+    <div>Shards: <span id="shards">0</span></div>
+    <div>Power: <span id="power">None</span></div>
+    <div style="margin-top:8px;">Press SPACE to Jump, D to Dash</div>
+  </div>
+  <div id="game-over" style="display:none;">
+    <h2>Game Over</h2>
+    <p>Your Score: <span id="final-score">0</span></p>
+    <p id="reflection-text" style="margin-top:10px; font-style: italic;"></p>
+    <button id="restart-btn">Restart</button>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>

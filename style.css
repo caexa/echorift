@@ -1,6 +1,6 @@
 body {
   margin: 0; padding: 0;
-  background: linear-gradient(to bottom, #111022, #332244);
+  background: linear-gradient(to bottom, #080818, #2a1f3a);
   color: #eee;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   text-align: center;
@@ -8,51 +8,56 @@ body {
 }
 
 h1 {
-  margin: 20px 0 10px;
-  text-shadow: 0 0 10px #7f5fff;
+  margin: 20px 0 12px;
+  font-weight: 700;
+  font-size: 36px;
+  text-shadow: 0 0 15px #bb88ff;
 }
 
 #story-box {
-  max-width: 500px;
+  max-width: 600px;
   margin: 0 auto 20px;
-  background: #221144;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 0 15px #7f5fff;
-  font-size: 18px;
-  line-height: 1.4;
+  background: #201844cc;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px #bb88ffcc;
+  font-size: 20px;
+  line-height: 1.5;
 }
 
 button {
-  margin-top: 15px;
-  padding: 8px 16px;
-  background: #7f5fff;
+  margin-top: 18px;
+  padding: 10px 20px;
+  background: #bb88ff;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   color: white;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 16px;
   cursor: pointer;
-  box-shadow: 0 0 8px #7f5fff;
-  transition: background 0.3s;
+  box-shadow: 0 0 12px #bb88ffcc;
+  transition: background 0.3s ease;
 }
 button:hover {
-  background: #a090ff;
+  background: #d0aaff;
 }
 
 #game {
-  background: #0a0a18;
+  background: #0c0c20;
   display: block;
   margin: 0 auto 15px;
-  border: 3px solid #7f5fff;
-  border-radius: 10px;
+  border: 4px solid #bb88ff;
+  border-radius: 16px;
 }
 
 #ui {
   font-size: 16px;
-  margin-bottom: 10px;
-  color: #b0aaff;
+  margin-bottom: 12px;
+  color: #ccbbffcc;
+  font-weight: 600;
 }
 
 #game-over {
   margin-top: 30px;
 }
+
